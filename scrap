@@ -1,0 +1,22 @@
+import re
+import mechanicalsoup
+
+browser = mechanicalsoup.Browser()
+
+item1 = sys.argv[1]
+
+base_url = "https://www.safeway.com/shop/search-results.html?q={ITEM}"
+url = base_url.replace("{ITEM}", item1)
+
+page = browser.get(url)
+html = page.soup
+# page = uReq(url)
+# html = page.read().decode("utf-8")
+# page.close()
+# products = re.findall("product-item-v2*?>", html)
+# hsoup = soup(html, "html.parser")
+# url = re.sub("{ITEM}", "", url)
+print(html.get_text())
+
+products = html.findAll("product-item-v2")
+print(products)
