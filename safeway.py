@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup as soup  # HTML data structure
 from urllib.request import urlopen as uReq  # Web client
 import sys
+import re
+import csv
 
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
@@ -24,15 +26,21 @@ driver.get(url)
 hsoup = soup(driver.page_source, "html.parser")
 
 products = hsoup.findAll("product-item-v2")
-filename = "products.csv"
-headers = "name, price\n"
 
-f = open(filename, "w")
-f.write(headers)
-
-for product in products:
-    name = product.select(".product-title")[0].text
-    price = product.select(".product-price-qty")[0].text
-    print(f"{name}: {price}")
-    f.write(name + ", " + price + "\n")
-
+with open("Safeway.csv", mode="w") as f:
+    writer = csv.writer(f, delimiter=",")
+    writer.writerow(["Name", "Current Price", "Unit Price", "Original Price"])
+    for product in products:
+        name = product.select(".product-title")[0].text
+        unit = product.select(".product-price-qty")[0].text
+        unit = unit.replace("(", "").replace(")", "")
+        prices = product.select(".product-price-con")[0].text
+        pricess = re.findall("\$[\d]*\.[\d][\d]", prices)
+        current = pricess[0]
+        if len(pricess) == 2:
+            original = pricess[1]
+            print(f"{name}: {current}, {unit}, {original}")
+            writer.writerow([name, current, unit, original])
+        else:
+            print(f"{name}: {current}, {unit}")
+            writer.writerow([name, current, unit])
