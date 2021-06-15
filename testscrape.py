@@ -38,6 +38,6 @@ print(img1["src"])  # can get attributes as if a dictionary
 print(soup.title)  # prints <title>Profile: Dionysus</title> cleans up for you!!
 print(soup.title.string)  # just Profile: Dionysus
 print(
-    soup.find_all("img", src="/static/dionysus.jpg")
+    soup.find_all("img", src = "/static/dionysus.jpg")
 )  # prints full element of img whose src is as specified
 
