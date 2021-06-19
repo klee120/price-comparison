@@ -18,30 +18,32 @@ def item_url(search_term):
     search_term = search_term.replace(" ", "+")
     return base_url.replace("{ITEM}", search_term)
 
-url = item_url("input("Enter an item: ")")
+
+url = item_url(input("Enter an item: "))
 
 driver.get(url)
 
 hsoup = soup(driver.page_source, "html.parser")
 
-print(hsoup.prettify())
+products = hsoup.findAll("product-card")
 
-products = hsoup.findAll("product-item-v2")
+with open("SmartFinal.csv", mode="w") as f:
+    writer = csv.writer(f, delimiter=",")
+    headers = ["Name", "Current Price", "Unit Price", "Original Price"]
+    writer = csv.DictWriter(f, fieldnames=headers)
+    writer.writeheader()
 
-with open("Safeway.csv", mode = "w") as f:
-    writer = csv.writer(f, delimiter = ",")
-    writer.writerow(["Name", "Current Price", "Unit Price", "Original Price"])
     for product in products:
-        name = product.select(".product-title")[0].text
-        unit = product.select(".product-price-qty")[0].text
-        unit = unit.replace("(", "").replace(")", "")
-        prices = product.select(".product-price-con")[0].text
-        pricess = re.findall("\$[\d]*\.[\d][\d]", prices)
-        current = pricess[0]
-        if len(pricess) == 2:
-            original = pricess[1]
-            print(f"{name}: {current}, {unit}, {original}")
-            writer.writerow([name, current, unit, original])
+        name = product.select(".product-name")[0].text
+        pricess = product.select(".sr-only")
+        current = pricess[0].text
+
+        if len(pricess) > 1:
+            original = pricess[1].text
+            writer.writerow(
+                {"Name": name, "Current Price": current, "Original Price": original,}
+            )
         else:
-            print(f"{name}: {current}, {unit}")
-            writer.writerow([name, current, unit])
+            writer.writerow(
+                {"Name": name, "Current Price": current,}
+            )
